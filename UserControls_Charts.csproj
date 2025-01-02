@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>MooreM.UserControls.Charts</RootNamespace>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageId>mmCharts</PackageId>
+    <Title>Set of simple charts</Title>
+    <Authors>Mathew Moore</Authors>
+    <Version>1.0.0</Version>
+    <Company>MooreM</Company>
+    <Description>Set of simple plot charts</Description>
+  </PropertyGroup>
+
+</Project>
