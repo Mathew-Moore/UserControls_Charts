@@ -10,9 +10,13 @@
     <PackageId></PackageId>
     <Title>Set of simple charts</Title>
     <Authors>Mathew Moore</Authors>
-    <Version>1.0.5</Version>
+    <Version>1.0.22</Version>
     <Company>MooreM</Company>
     <Description>Set of simple plot charts</Description>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MooreM.Common.Libraries.CommonLibrary" Version="1.0.1" />
+  </ItemGroup>
 
 </Project>
