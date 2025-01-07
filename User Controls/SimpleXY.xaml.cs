@@ -51,6 +51,7 @@ namespace MooreM.UserControls.Charts
         public SimpleXY()
         {
             InitializeComponent();
+            InvalidateVisual();
         }
 
         protected override void OnRender(DrawingContext drawingContext)
@@ -61,21 +62,26 @@ namespace MooreM.UserControls.Charts
 
         protected void Draw_BackgroundGrid(DrawingContext drawingContext)
         {
-            for (int i = 0; i < Width; i += 10)
+            for (int i = 0; i <ActualWidth; i += 10)
             {
                 Point p1 = new Point(i, 0);
-                Point p2 = new Point(i, Height);
+                Point p2 = new Point(i,this. ActualHeight);
                 drawingContext.DrawLine(pen_Background_Grid, p1, p2);
 
             }
 
-            for (int i = (int)Height; i > 0; i -= 10)
+            for (int i = (int)ActualHeight; i > 0; i -= 10)
             {
                 Point p1 = new Point(0, i);
-                Point p2 = new Point(Width, i);
+                Point p2 = new Point(this.ActualWidth, i);
                 drawingContext.DrawLine(pen_Background_Grid, p1, p2);
 
             }
+        }
+
+        private void Grid_SourceUpdated(object sender, DataTransferEventArgs e)
+        {
+            InvalidateVisual();
         }
     }
 }

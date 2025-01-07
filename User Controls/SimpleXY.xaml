@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:MooreM.UserControls.Charts"
              mc:Ignorable="d" 
              d:DesignHeight="300" d:DesignWidth="400">
-    <Grid>
+    <Grid SourceUpdated="Grid_SourceUpdated">
             
     </Grid>
 </UserControl>
