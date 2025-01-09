@@ -12,6 +12,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace MooreM.UserControls.Charts
 {
@@ -57,23 +58,12 @@ namespace MooreM.UserControls.Charts
         {
             InitializeComponent();
             InvalidateVisual();
-            Channel_0.Dirty += Channel_0_Dirty;
+            _Channel = new Classes.Channel[6];
+         //   _Channel[0] = new Classes.Channel(false, Color.FromArgb(255, 255, 0, 0));
+         //   _Channel[1] = new Classes.Channel(false, Color.FromArgb(255, 0, 255, 0));
+
 
         }
-
-        private void Channel_0_Dirty()
-        {
-            this.InvalidateVisual();
-        }
-
-        protected override void OnRender(DrawingContext drawingContext)
-        {
-            base.OnRender(drawingContext);
-            Draw_BackgroundGrid(drawingContext);
-            if (_Channel_0.Enabled) { Draw_Zero_0(drawingContext); }
-            if (_Channel_1.Enabled) { Draw_Zero_1(drawingContext); }
-        }
-
         #region Methods to  find Widths / Heights
 
         protected int GetHeight()
@@ -104,96 +94,127 @@ namespace MooreM.UserControls.Charts
 
         #endregion
 
-        protected void Draw_Zero_0(DrawingContext drawingContext)
-        {
-            if (_Channel_0.DrawFaintLine)
-            {
-                Point _Start_WithOffset = new Point(_ChartOffset_Width, GetHalf_Height());
-                Point _End_WithOffset = new Point(GetWidth(), GetHalf_Height());
-                drawingContext.DrawLine(_Channel_0.PenIndicator, _Start_WithOffset, _End_WithOffset);
-            }
-            Point _Start = new Point(5, GetHalf_Height());
-            Point _End = new Point(_ChartOffset_Width - 5, GetHalf_Height());
-            drawingContext.DrawLine(_Channel_0.Pen, _Start, _End);
+        #region GUI and Overrides
 
+        protected override void OnRender(DrawingContext drawingContext)
+        {
+            base.OnRender(drawingContext);
+            Draw_BackgroundGrid(drawingContext);
+            Draw_Zeros(drawingContext);
         }
 
-        protected void Draw_Zero_1(DrawingContext drawingContext)
+        public void Refresh()
         {
-            if (_Channel_1.DrawFaintLine)
-            {
-                Point _Start_WithOffset = new Point(_ChartOffset_Width, (GetHalf_Height() + _Channel_1.Offset));
-                Point _End_WithOffset = new Point(GetWidth(), (GetHalf_Height() + _Channel_1.Offset));
-                drawingContext.DrawLine(_Channel_0.PenIndicator, _Start_WithOffset, _End_WithOffset);
-            }
-            Point _Start = new Point(5, (GetHalf_Height() + _Channel_1.Offset));
-            Point _End = new Point(_ChartOffset_Width - 5, (GetHalf_Height() + _Channel_1.Offset));
-            drawingContext.DrawLine(_Channel_1.Pen, _Start, _End);
-
+            this.Dispatcher.Invoke(() => { InvalidateVisual(); });
         }
 
+
+        /// <summary>
+        /// Method to draw Lines in colours at a channels zero point
+        /// </summary>
+        /// <remarks>This can include offsets</remarks>
+        /// <param name="drawingContext"></param>
+        protected void Draw_Zeros(DrawingContext drawingContext)
+        {
+            for (int i = 0; i < 6; i++)
+            {
+                if (_Channel[i] != null && _Channel[i].Enabled)
+                {
+                    int _OffsetValue = (int)(GetHalf_Height() - _Channel[i].Offset);    //substracted because of 0 being at the top
+                    if (_Channel[i].DrawFaintLine)
+                    {  // draw zero line on graph if required
+                        Point _Start_WithOffset = new Point(_ChartOffset_Width, _OffsetValue);
+                        Point _End_WithOffset = new Point(GetWidth(), _OffsetValue);
+                        drawingContext.DrawLine(_Channel[i].PenIndicator, _Start_WithOffset, _End_WithOffset);
+                        RaiseEvent_Diagnostics("Offset: " + i.ToString() + " " + _OffsetValue.ToString());
+                    }
+                    //draw zero line at the side of the graph
+                    Point _Start = new Point(5, _OffsetValue);
+                    Point _End = new Point(_ChartOffset_Width - 5, _OffsetValue);
+                    drawingContext.DrawLine(_Channel[i].Pen, _Start, _End);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Method to draw a grid of 10x10 pixels
+        /// </summary>
+        /// <param name="drawingContext"></param>
         protected void Draw_BackgroundGrid(DrawingContext drawingContext)
         {
-
             int _Height = GetHeight();
             int _Width = GetWidth();
 
             //Draw a set of lines across the chart area
-            for (int i = _ChartOffset_Width; i < (_Width + 1); i += 10)
+            for (int i = _ChartOffset_Width; i < (_Width); i += 10)
             {
                 Point p1 = new Point(i, 0);
                 Point p2 = new Point(i, _Height);
                 drawingContext.DrawLine(pen_Background_Grid, p1, p2);
-
             }
 
             //Draw a set of lines down the chart area
-            for (int i = (int)(_Height + 1); i > 0; i -= 10)
+            for (int i = (int)(_Height ); i > 0; i -= 10)
             {
                 Point p1 = new Point(_ChartOffset_Width, i);
                 Point p2 = new Point(_Width, i);
                 drawingContext.DrawLine(pen_Background_Grid, p1, p2);
-
             }
 
+            //Draw a Center line
+                Point p3 = new Point(0, GetHalf_Height());
+                Point p4 = new Point(_Width, GetHalf_Height());
+                drawingContext.DrawLine(pen_Background_Grid, p3, p4);
         }
 
+        /// <summary>
+        /// Event sink for when data is changed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Grid_SourceUpdated(object sender, DataTransferEventArgs e)
         {
-            InvalidateVisual();
+            Refresh();
         }
 
+        #endregion
+
+        /// <summary>
+        /// Helper method to call diagnostics event 
+        /// </summary>
+        /// <param name="Message">message to be displayed</param>
         protected void RaiseEvent_Diagnostics(string Message)
         {
             if (Diagnostics != null) { Diagnostics(this, new Common.Libraries.CommonLibrary.EventHandlers.ClsEventHandler_Diagnostics(DateTime.Now, Message)); }
         }
 
-        public int ChartOffset { get { return _ChartOffset_Width; } set { _ChartOffset_Width = value; } }
+        /// <summary>
+        /// Property which defines the left hand side gap to display zero line
+        /// </summary>
+        public int ChartOffset_Leftside
+        {
+            get { return _ChartOffset_Width; }
+            set { _ChartOffset_Width = value; }
+        }
 
-        #region Public Channel Enables
+        #region Public Channel 
+
         private MooreM.UserControls.Charts.Classes.Channel[] _Channel;
 
-       public MooreM.UserControls.Charts.Classes.Channel this[int index]
+        public MooreM.UserControls.Charts.Classes.Channel this[int index]
         {
-            get { return _Channel[index]; } set { _Channel[index] = value; }
+            get { return _Channel[index]; }
+            set { _Channel[index] = value; }
         }
 
-        private MooreM.UserControls.Charts.Classes.Channel _Channel_0 = new Classes.Channel(false, Color.FromArgb(255, 255, 0, 0));
-
-        public MooreM.UserControls.Charts.Classes.Channel Channel_0
+        public void Create(int Index, bool enabled, System.Windows.Media.Color colour)
         {
-            get { return _Channel_0; }
-            set { _Channel_0 = value; }
-        }
-
-        private MooreM.UserControls.Charts.Classes.Channel _Channel_1 = new Classes.Channel(false, Color.FromArgb(255, 0, 255, 0));
-
-        public MooreM.UserControls.Charts.Classes.Channel Channel_1
-        {
-            get { return _Channel_1; }
-            set { _Channel_1 = value; }
+             _Channel[Index] = new Classes.Channel(enabled,colour);
+            Refresh();
         }
 
         #endregion
+
+
     }
 }
