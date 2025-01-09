@@ -25,11 +25,12 @@ namespace MooreM.UserControls.Charts
         private Color color_BackgroundGrid = System.Windows.Media.Color.FromRgb(192, 192, 192);
         private Pen? pen_Background_Grid = new Pen(new SolidColorBrush(System.Windows.Media.Color.FromRgb(192, 192, 192)), 1);
         private Pen pen2 = new Pen(new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 0, 0)), 1);
-        protected Pen _Pen_Zero_0 = new Pen(new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 0, 0)), 1);
         protected Color color_background = Color.FromRgb(230, 230, 120);
         protected System.Windows.Rect rectangle = new Rect() { Width = 100, Height = 100 };
         protected int _X;
         protected int _Y;
+
+        protected int _ChartOffset_Width = 20;
 
         public event MooreM.Common.Libraries.CommonLibrary.Delegates.delDiagnostics Diagnostics;
         //
@@ -49,7 +50,6 @@ namespace MooreM.UserControls.Charts
             }
         }
 
-        //   public bool SnapToGrid { get { return _SnapToGrid; } set { _SnapToGrid = value; } }
         #endregion
 
 
@@ -57,14 +57,24 @@ namespace MooreM.UserControls.Charts
         {
             InitializeComponent();
             InvalidateVisual();
+            Channel_0.Dirty += Channel_0_Dirty;
+
+        }
+
+        private void Channel_0_Dirty()
+        {
+            this.InvalidateVisual();
         }
 
         protected override void OnRender(DrawingContext drawingContext)
         {
             base.OnRender(drawingContext);
             Draw_BackgroundGrid(drawingContext);
-            Draw_Zero_0(drawingContext);
+            if (_Channel_0.Enabled) { Draw_Zero_0(drawingContext); }
+            if (_Channel_1.Enabled) { Draw_Zero_1(drawingContext); }
         }
+
+        #region Methods to  find Widths / Heights
 
         protected int GetHeight()
         {
@@ -85,36 +95,51 @@ namespace MooreM.UserControls.Charts
             double d = (double)GetHeight() / 2;
             return (int)d;
         }
+
         protected int GetHalf_Width()
         {
             double d = (double)GetWidth() / 2;
             return (int)d;
         }
 
+        #endregion
+
         protected void Draw_Zero_0(DrawingContext drawingContext)
         {
-            Point _Start = new Point(0, GetHalf_Height());
-            Point _End = new Point(GetWidth(), GetHalf_Height());
+            if (_Channel_0.DrawFaintLine)
+            {
+                Point _Start_WithOffset = new Point(_ChartOffset_Width, GetHalf_Height());
+                Point _End_WithOffset = new Point(GetWidth(), GetHalf_Height());
+                drawingContext.DrawLine(_Channel_0.PenIndicator, _Start_WithOffset, _End_WithOffset);
+            }
+            Point _Start = new Point(5, GetHalf_Height());
+            Point _End = new Point(_ChartOffset_Width - 5, GetHalf_Height());
+            drawingContext.DrawLine(_Channel_0.Pen, _Start, _End);
 
-            drawingContext.DrawLine(_Pen_Zero_0, _Start, _End);
-            RaiseEvent_Diagnostics(_Start.ToString());
-            RaiseEvent_Diagnostics(_End.ToString());
+        }
+
+        protected void Draw_Zero_1(DrawingContext drawingContext)
+        {
+            if (_Channel_1.DrawFaintLine)
+            {
+                Point _Start_WithOffset = new Point(_ChartOffset_Width, (GetHalf_Height() + _Channel_1.Offset));
+                Point _End_WithOffset = new Point(GetWidth(), (GetHalf_Height() + _Channel_1.Offset));
+                drawingContext.DrawLine(_Channel_0.PenIndicator, _Start_WithOffset, _End_WithOffset);
+            }
+            Point _Start = new Point(5, (GetHalf_Height() + _Channel_1.Offset));
+            Point _End = new Point(_ChartOffset_Width - 5, (GetHalf_Height() + _Channel_1.Offset));
+            drawingContext.DrawLine(_Channel_1.Pen, _Start, _End);
 
         }
 
         protected void Draw_BackgroundGrid(DrawingContext drawingContext)
         {
 
-            //   int _Half_H = (int)(_Blocks20_H / 2);
-
             int _Height = GetHeight();
             int _Width = GetWidth();
 
-            //     int _Half_W = (int)(_Width / 2);
-
-
-            // for (int i = 0; i <ActualWidth; i += 10)
-            for (int i = 0; i < (_Width + 1); i += 10)
+            //Draw a set of lines across the chart area
+            for (int i = _ChartOffset_Width; i < (_Width + 1); i += 10)
             {
                 Point p1 = new Point(i, 0);
                 Point p2 = new Point(i, _Height);
@@ -122,9 +147,10 @@ namespace MooreM.UserControls.Charts
 
             }
 
+            //Draw a set of lines down the chart area
             for (int i = (int)(_Height + 1); i > 0; i -= 10)
             {
-                Point p1 = new Point(0, i);
+                Point p1 = new Point(_ChartOffset_Width, i);
                 Point p2 = new Point(_Width, i);
                 drawingContext.DrawLine(pen_Background_Grid, p1, p2);
 
@@ -141,5 +167,33 @@ namespace MooreM.UserControls.Charts
         {
             if (Diagnostics != null) { Diagnostics(this, new Common.Libraries.CommonLibrary.EventHandlers.ClsEventHandler_Diagnostics(DateTime.Now, Message)); }
         }
+
+        public int ChartOffset { get { return _ChartOffset_Width; } set { _ChartOffset_Width = value; } }
+
+        #region Public Channel Enables
+        private MooreM.UserControls.Charts.Classes.Channel[] _Channel;
+
+       public MooreM.UserControls.Charts.Classes.Channel this[int index]
+        {
+            get { return _Channel[index]; } set { _Channel[index] = value; }
+        }
+
+        private MooreM.UserControls.Charts.Classes.Channel _Channel_0 = new Classes.Channel(false, Color.FromArgb(255, 255, 0, 0));
+
+        public MooreM.UserControls.Charts.Classes.Channel Channel_0
+        {
+            get { return _Channel_0; }
+            set { _Channel_0 = value; }
+        }
+
+        private MooreM.UserControls.Charts.Classes.Channel _Channel_1 = new Classes.Channel(false, Color.FromArgb(255, 0, 255, 0));
+
+        public MooreM.UserControls.Charts.Classes.Channel Channel_1
+        {
+            get { return _Channel_1; }
+            set { _Channel_1 = value; }
+        }
+
+        #endregion
     }
 }
