@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Ink;
 using System.Windows.Media;
 
 namespace MooreM.UserControls.Charts.Classes
@@ -17,6 +18,8 @@ namespace MooreM.UserControls.Charts.Classes
         private bool _DrawFaintLine;
         protected byte _PenIndicatorTransparancy = 50;
         private double _Offset;
+
+        protected System.Drawing. Point[] _Points;
 
         #endregion
 
@@ -70,6 +73,12 @@ namespace MooreM.UserControls.Charts.Classes
         {
             get { return _Offset; }
             set { _Offset = value; }
+        }
+
+      public Point[] Points
+        {
+            get { return _Points; }
+            set { _Points = value; }
         }
 
         #endregion

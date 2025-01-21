@@ -23,6 +23,7 @@ namespace MooreM.UserControls.Charts
     {
 
         #region Fields
+
         private Color color_BackgroundGrid = System.Windows.Media.Color.FromRgb(192, 192, 192);
         private Pen? pen_Background_Grid = new Pen(new SolidColorBrush(System.Windows.Media.Color.FromRgb(192, 192, 192)), 1);
         private Pen pen2 = new Pen(new SolidColorBrush(System.Windows.Media.Color.FromRgb(255, 0, 0)), 1);
@@ -30,6 +31,8 @@ namespace MooreM.UserControls.Charts
         protected System.Windows.Rect rectangle = new Rect() { Width = 100, Height = 100 };
         protected int _X;
         protected int _Y;
+
+        private Brush brush = new SolidColorBrush(Color.FromArgb(255, 255, 0, 255));
 
         protected int _ChartOffset_Width = 20;
 
@@ -51,6 +54,7 @@ namespace MooreM.UserControls.Charts
             }
         }
 
+
         #endregion
 
 
@@ -59,8 +63,8 @@ namespace MooreM.UserControls.Charts
             InitializeComponent();
             InvalidateVisual();
             _Channel = new Classes.Channel[6];
-         //   _Channel[0] = new Classes.Channel(false, Color.FromArgb(255, 255, 0, 0));
-         //   _Channel[1] = new Classes.Channel(false, Color.FromArgb(255, 0, 255, 0));
+               _Channel[0] = new Classes.Channel(false, Color.FromArgb(255, 255, 0, 0));
+            //   _Channel[1] = new Classes.Channel(false, Color.FromArgb(255, 0, 255, 0));
 
 
         }
@@ -101,6 +105,13 @@ namespace MooreM.UserControls.Charts
             base.OnRender(drawingContext);
             Draw_BackgroundGrid(drawingContext);
             Draw_Zeros(drawingContext);
+            if (_Channel != null)
+            {
+                for (byte i = 0; i < _Channel.Count(); i++)
+                {
+                    Draw_Points(i, drawingContext);
+                }
+            }
         }
 
         public void Refresh()
@@ -154,7 +165,7 @@ namespace MooreM.UserControls.Charts
             }
 
             //Draw a set of lines down the chart area
-            for (int i = (int)(_Height ); i > 0; i -= 10)
+            for (int i = (int)(_Height); i > 0; i -= 10)
             {
                 Point p1 = new Point(_ChartOffset_Width, i);
                 Point p2 = new Point(_Width, i);
@@ -162,9 +173,21 @@ namespace MooreM.UserControls.Charts
             }
 
             //Draw a Center line
-                Point p3 = new Point(0, GetHalf_Height());
-                Point p4 = new Point(_Width, GetHalf_Height());
-                drawingContext.DrawLine(pen_Background_Grid, p3, p4);
+            Point p3 = new Point(0, GetHalf_Height());
+            Point p4 = new Point(_Width, GetHalf_Height());
+            drawingContext.DrawLine(pen_Background_Grid, p3, p4);
+        }
+
+        protected void Draw_Points(byte Channel,DrawingContext drawingContext)
+        { 
+            if (_Channel[Channel].Points != null)
+            {
+                foreach (System.Drawing. Point p in _Channel[Channel].Points)
+                {
+                    drawingContext.DrawRectangle(brush, pen2, new Rect(p.X, p.Y, 1, 1));
+                }
+                System.Diagnostics.Debug.WriteLine("Channel: " + Channel);
+            }
         }
 
         /// <summary>
@@ -209,12 +232,16 @@ namespace MooreM.UserControls.Charts
 
         public void Create(int Index, bool enabled, System.Windows.Media.Color colour)
         {
-             _Channel[Index] = new Classes.Channel(enabled,colour);
+            _Channel[Index] = new Classes.Channel(enabled, colour);
             Refresh();
         }
 
         #endregion
 
+        public void DrawPoints(byte Channel,System.Drawing. Point[] Data)
+        {
+            _Channel[Channel].Points = Data;
+        }
 
     }
 }
