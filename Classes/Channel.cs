@@ -19,7 +19,7 @@ namespace MooreM.UserControls.Charts.Classes
         protected byte _PenIndicatorTransparancy = 50;
         private double _Offset;
 
-        protected System.Drawing. Point[] _Points;
+        protected System.Drawing.Point[] _Points;
 
         #endregion
 
@@ -39,11 +39,15 @@ namespace MooreM.UserControls.Charts.Classes
             set { _enabled = value; RaiseEvent_Dirty(); }
         }
 
+        /// <summary>
+        /// Colour user selected for chart
+        /// </summary>
         public System.Windows.Media.Color Colour
         {
             get { return _Colour; }
             set { _Colour = value; RaiseEvent_Dirty(); }
         }
+
 
         private Pen _Pen;
 
@@ -52,30 +56,45 @@ namespace MooreM.UserControls.Charts.Classes
             get { return _Pen; }
         }
 
+        /// <summary>
+        /// Pen usedto draw trace (defined by the pen colour)
+        /// </summary>
         public Pen PenIndicator
         {
             get { return new Pen(new SolidColorBrush(System.Windows.Media.Color.FromArgb(_PenIndicatorTransparancy, _Colour.R, _Colour.G, _Colour.B)), 1); }
         }
 
+        /// <summary>
+        /// How transparent the zero lineis 
+        /// </summary>
         public byte PenIndiactorTransparancy
         {
             get { return _PenIndicatorTransparancy; }
             set { _PenIndicatorTransparancy = value; RaiseEvent_Dirty(); }
         }
 
+        /// <summary>
+        /// Indiactes if the zero line is drawn across the chart 
+        /// </summary>
         public bool DrawFaintLine
         {
             get { return _DrawFaintLine; }
             set { _DrawFaintLine = value; }
         }
 
+        /// <summary>
+        /// Offset value of the values frm the physical zero chart
+        /// </summary>
         public double Offset
         {
             get { return _Offset; }
             set { _Offset = value; }
         }
 
-      public Point[] Points
+        /// <summary>
+        /// Points to draw
+        /// </summary>
+        public Point[] Points
         {
             get { return _Points; }
             set { _Points = value; }

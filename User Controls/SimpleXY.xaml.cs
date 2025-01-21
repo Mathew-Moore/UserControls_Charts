@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -43,6 +44,9 @@ namespace MooreM.UserControls.Charts
 
         #region Public Properties
 
+        /// <summary>
+        /// Colour used to draw the grid on the background
+        /// </summary>
         public Color Pen_BackgroundGrid
         {
             get { return color_BackgroundGrid; }
@@ -57,14 +61,14 @@ namespace MooreM.UserControls.Charts
 
         #endregion
 
-
+        /// <summary>
+        /// Default constructor which creates 6 channel ready for use
+        /// </summary>
         public SimpleXY()
         {
             InitializeComponent();
             InvalidateVisual();
             _Channel = new Classes.Channel[6];
-               _Channel[0] = new Classes.Channel(false, Color.FromArgb(255, 255, 0, 0));
-            //   _Channel[1] = new Classes.Channel(false, Color.FromArgb(255, 0, 255, 0));
 
 
         }
@@ -105,11 +109,29 @@ namespace MooreM.UserControls.Charts
             base.OnRender(drawingContext);
             Draw_BackgroundGrid(drawingContext);
             Draw_Zeros(drawingContext);
+
             if (_Channel != null)
             {
                 for (byte i = 0; i < _Channel.Count(); i++)
                 {
-                    Draw_Points(i, drawingContext);
+                    if (_Channel[i] != null)
+                    {
+                        if (_Channel[i].Points != null)
+                        {
+                            RaiseEvent_Diagnostics($"Channel {i}, Data {_Channel[i].Points.ToString()}");
+                            foreach(System.Drawing. Point p in _Channel[i].Points)
+                            {
+                                int _XX = (p.X * _Scale_X) + ChartOffset_Leftside;
+                                int _YY = (int)((p.Y - GetHalf_Height()) * -1);
+                                drawingContext.DrawEllipse(brush, pen2, new Point(_XX-1,_YY-1), 2, 2);
+                            }
+                        }
+                        else
+                        {
+                            RaiseEvent_Diagnostics($"Channel {i}, Data is null");
+                        }
+                        Draw_Points(i, drawingContext);
+                    }
                 }
             }
         }
@@ -178,16 +200,9 @@ namespace MooreM.UserControls.Charts
             drawingContext.DrawLine(pen_Background_Grid, p3, p4);
         }
 
-        protected void Draw_Points(byte Channel,DrawingContext drawingContext)
-        { 
-            if (_Channel[Channel].Points != null)
-            {
-                foreach (System.Drawing. Point p in _Channel[Channel].Points)
-                {
-                    drawingContext.DrawRectangle(brush, pen2, new Rect(p.X, p.Y, 1, 1));
-                }
-                System.Diagnostics.Debug.WriteLine("Channel: " + Channel);
-            }
+        protected void Draw_Points(byte Channel, DrawingContext drawingContext)
+        {
+            System.Diagnostics.Debug.WriteLine("Channel: " + Channel);
         }
 
         /// <summary>
@@ -230,17 +245,35 @@ namespace MooreM.UserControls.Charts
             set { _Channel[index] = value; }
         }
 
-        public void Create(int Index, bool enabled, System.Windows.Media.Color colour)
+        /// <summary>
+        /// Method to create a channel ready for use
+        /// </summary>
+        /// <param name="Index">Channel number</param>
+        /// <param name="Enabled">Standard true / false to use chart</param>
+        /// <param name="Colour">Colour used to draw chart</param>
+        public void Create(int Index, bool Enabled, System.Windows.Media.Color Colour)
         {
-            _Channel[Index] = new Classes.Channel(enabled, colour);
+            _Channel[Index] = new Classes.Channel(Enabled, Colour);
             Refresh();
+        }
+
+        private int _Scale_X=1;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        public int Scale_X
+        {
+            get { return _Scale_X; }
+            set { _Scale_X = value;Refresh(); }
         }
 
         #endregion
 
-        public void DrawPoints(byte Channel,System.Drawing. Point[] Data)
+        public void DrawPoints(byte Channel, System.Drawing.Point[] Data)
         {
             _Channel[Channel].Points = Data;
+            Refresh();
         }
 
     }
