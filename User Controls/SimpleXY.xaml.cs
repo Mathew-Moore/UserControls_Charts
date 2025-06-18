@@ -110,7 +110,8 @@ namespace MooreM.UserControls.Charts
             base.OnRender(drawingContext);
             Draw_BackgroundGrid(drawingContext);
             Draw_Zeros(drawingContext);
-            int __Accum = 0;
+            int _Index = GetWidth();
+            int _Last = 0;
             if (_Channel != null)
             {
                 for (byte i = 0; i < _Channel.Count(); i++)
@@ -119,27 +120,29 @@ namespace MooreM.UserControls.Charts
                     {
                         if (_Channel[i].Points != null)
                         {
-                            
+                            _Last = (int)((_Channel[i].Points[_Channel[i].Points.Length - 1].X) / _Scale_X);
+                            _Index = GetWidth() - _Last;
+
                             for (int p = (_Channel[i].Points.Length - 1); p > 0; p--)
                             //   foreach (System.Drawing.Point p in _Channel[i].Points)
                             {
-                               
-                                int _XXX = _Channel[i].Points[p].X;
-                                int _YYY = _Channel[i].Points[p].Y;
-                              
-                                int _XX = (GetWidth() - (int)(_XXX * _Scale_X));
+
+                                int _XXX = _Channel[i].Points[p].X;         //get the X value
+                                int _YYY = _Channel[i].Points[p].Y;         //get the Y value
+
+
+
+                                int _XX = _Index + (int)(_XXX / _Scale_X);
                                 int _YY = (int)(((_YYY - GetHalf_Height()) * -1) - _Channel[i].Offset);
-                               __Accum += _XX;
-                                
-                                RaiseEvent_Diagnostics("X: " + _XX + ", Y: " + _YY);
-                                if (_YY >= 0 & _YY < GetHeight())
+
+
+                                RaiseEvent_Diagnostics("Index: " + _Index + ", Y: " + _YY);
+                                if ((_YY >= 0 & _YY < GetHeight()) & _Index > ChartOffset_Leftside)
                                 {
-                                    drawingContext.DrawEllipse(brush, pen2, new Point(_XX - 1, _YY - 1), 1, 1);
-                                    if (_XX < ChartOffset_Leftside)
-                                    {
-                                        break;
-                                    }
+                                    drawingContext.DrawEllipse(brush,_Channel[i].Pen, new Point(_XX - 1, _YY - 1), 1, 1); //Only draw if in the window
+
                                 }
+
                             }
                         }
                         else
@@ -273,12 +276,12 @@ namespace MooreM.UserControls.Charts
             Refresh();
         }
 
-        private int _Scale_X = 1;
+        private double _Scale_X = 1;
 
         /// <summary>
         /// Time based scale, this is X per pixel  (eg 1 msec per pixel
         /// </summary>
-        public int Scale_X
+        public double Scale_X
         {
             get { return _Scale_X; }
             set { _Scale_X = value; Refresh(); }
