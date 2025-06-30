@@ -127,8 +127,8 @@ namespace MooreM.UserControls.Charts
                             //   foreach (System.Drawing.Point p in _Channel[i].Points)
                             {
 
-                                int _XXX = _Channel[i].Points[p].X;         //get the X value
-                                int _YYY = _Channel[i].Points[p].Y;         //get the Y value
+                                int _XXX = (int)_Channel[i].Points[p].X;         //get the X value
+                                int _YYY =(int) _Channel[i].Points[p].Y;         //get the Y value
 
 
 
@@ -289,11 +289,13 @@ namespace MooreM.UserControls.Charts
 
         #endregion
 
-        public void DrawPoints(byte Channel, System.Drawing.Point[] Data)
+        public void DrawPoints(byte Channel, System.Windows.Point[] Data)
         {
             _Channel[Channel].Points = Data;
             Refresh();
         }
+
+  
 
     }
 }

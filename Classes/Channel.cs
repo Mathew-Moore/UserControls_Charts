@@ -19,7 +19,7 @@ namespace MooreM.UserControls.Charts.Classes
         protected byte _PenIndicatorTransparancy = 50;
         private double _Offset;
 
-        protected System.Drawing.Point[] _Points;
+        protected System.Windows.Point[] _Points;
 
         #endregion
 
@@ -94,7 +94,7 @@ namespace MooreM.UserControls.Charts.Classes
         /// <summary>
         /// Points to draw
         /// </summary>
-        public Point[] Points
+        public System.Windows. Point[] Points
         {
             get { return _Points; }
             set { _Points = value; }
@@ -110,6 +110,8 @@ namespace MooreM.UserControls.Charts.Classes
             Colour = colour;
             _Pen = new Pen(new SolidColorBrush(_Colour), 1);
         }
+
+
 
         #endregion
 
